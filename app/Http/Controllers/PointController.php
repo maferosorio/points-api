@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Point;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Requests;
+use Illuminate\Validation\Rule;
 
 class PointController extends Controller
 {
@@ -17,14 +17,25 @@ class PointController extends Controller
      */
     public function store(Request $request)
     {
-        //dd($request);
-        $point = new Point;
+        //regex: evaluates if a coordinate value is between 1 and 4 integer digits and 1 or 2 decimals digits.
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|unique:points|max:20',
+            'coordinate_x' => 'required|numeric|regex:/^\d{1,4}(\.\d{1,2})?$/',
+            'coordinate_y' => 'required|numeric|regex:/^\d{1,4}(\.\d{1,2})?$/'
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Point could not be saved.','errors' => $validator->errors()]);
+        }
+        $point = new Point;
         $point->name = $request->name;
         $point->coordinate_x = $request->coordinate_x;
         $point->coordinate_y = $request->coordinate_y;
-
-        $point->save();
+        
+        if(!$point->save()){
+            return response()->json(['message' => 'There was an error while saving the point.']);
+        }
+        return response()->json(['message' => 'Point was saved succesfully.']);
     }
 
     /**
@@ -48,14 +59,28 @@ class PointController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //dd($id);
-        //dd($request->input('name')); 
-        //dd($request->all()); 
-        $pointToUpdate = Point::findOrFail($id);
+        $pointToUpdate = Point::find($id);
+        if(!$pointToUpdate){
+            return response()->json(['message' => 'Unable to find the point.'],404);
+        }
+        //regex: evaluates if a coordinate value is between 1 and 4 integer digits and 1 or 2 decimals digits.
+        $validator = Validator::make($request->all(), [
+            'name' => ['required','string','max:20', Rule::unique('points')->ignore($id)],
+            'coordinate_x' => 'required|numeric|regex:/^\d{1,4}(\.\d{1,2})?$/',
+            'coordinate_y' => 'required|numeric|regex:/^\d{1,4}(\.\d{1,2})?$/'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Point could not be updated.','errors' => $validator->errors()]);
+        }
         $pointToUpdate->name = $request->name;
         $pointToUpdate->coordinate_x = $request->coordinate_x;
         $pointToUpdate->coordinate_y = $request->coordinate_y;
-        $pointToUpdate->save();
+        
+        if(!$pointToUpdate->save()){
+            return response()->json(['message' => 'There was an error while updating the point.']);
+        }
+        return response()->json(['message' => 'Point was updated succesfully.']);
     }
 
     /**
@@ -66,13 +91,21 @@ class PointController extends Controller
      */
     public function destroy($id)
     {
-        //dd($id);
-        //$flight = App\Flight::find(1);
-        $pointToDelete = Point::findOrFail($id);
-        $pointToDelete->delete();
+        $point = Point::find($id);
+        if(!$point){
+            return response()->json(['message' => 'Unable to find the point.'],404);
+        }
+
+        if(!$point->delete()){
+            return response()->json(['message' => 'There was an error while deleting the point.']);
+        } 
+        return response()->json(['message' => 'Point was deleted succesfully.']);
     }
 
-    public function getNearestPoints(Point $point, $limit){
+    public function getNearestPoints($id, $limit){
 
+        $points = Point::all();
+
+        dd($points);
     }
 }
