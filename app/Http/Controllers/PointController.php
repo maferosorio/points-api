@@ -25,17 +25,14 @@ class PointController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['message' => 'Point could not be saved.','errors' => $validator->errors()]);
+            return response()->json(['success' => false, 'message' => 'Point could not be saved.','errors' => $validator->errors()]);
         }
-        $point = new Point;
-        $point->name = $request->name;
-        $point->coordinate_x = $request->coordinate_x;
-        $point->coordinate_y = $request->coordinate_y;
         
-        if(!$point->save()){
-            return response()->json(['message' => 'There was an error while saving the point.']);
+        $point = new Point();
+        if( !$point->create( $request->all() ) ){
+            return response()->json(['success' => false, 'message' => 'There was an error while saving the point.']);
         }
-        return response()->json(['message' => 'Point was saved succesfully.']);
+        return response()->json(['success' => true, 'message' => 'Point was saved succesfully.']);
     }
 
     /**
@@ -44,9 +41,14 @@ class PointController extends Controller
      * @param  \App\Point  $point
      * @return \Illuminate\Http\Response
      */
-    public function show(Point $point)
+    public function show($id)
     {
-        //
+        $point = Point::find($id, ['name', 'coordinate_x','coordinate_y']);
+        
+        if(!$point){
+            return response()->json(['success' => false, 'message' => 'Unable to find a point.'],404);
+        }
+        return response()->json(['success' => true, 'point' => array($point->toArray())]);
     }
 
 
@@ -59,9 +61,10 @@ class PointController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $pointToUpdate = Point::find($id);
-        if(!$pointToUpdate){
-            return response()->json(['message' => 'Unable to find the point.'],404);
+        $point = new Point();    
+        $foundPoint= $point->verifyIfExists($id);    
+        if(!$foundPoint){
+            return response()->json(['message' => 'Unable to find a point.'],404);
         }
         //regex: evaluates if a coordinate value is between 1 and 4 integer digits and 1 or 2 decimals digits.
         $validator = Validator::make($request->all(), [
@@ -70,17 +73,14 @@ class PointController extends Controller
             'coordinate_y' => 'required|numeric|regex:/^\d{1,4}(\.\d{1,2})?$/'
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['message' => 'Point could not be updated.','errors' => $validator->errors()]);
+        if($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Point could not be updated.','errors' => $validator->errors()]);
         }
-        $pointToUpdate->name = $request->name;
-        $pointToUpdate->coordinate_x = $request->coordinate_x;
-        $pointToUpdate->coordinate_y = $request->coordinate_y;
         
-        if(!$pointToUpdate->save()){
-            return response()->json(['message' => 'There was an error while updating the point.']);
+        if( !$foundPoint->modify($request->all(), $foundPoint) ){
+            return response()->json(['success' => false, 'message' => 'There was an error while updating the point.']);
         }
-        return response()->json(['message' => 'Point was updated succesfully.']);
+        return response()->json(['success' => true, 'message' => 'Point was updated succesfully.']);
     }
 
     /**
@@ -93,13 +93,13 @@ class PointController extends Controller
     {
         $point = Point::find($id);
         if(!$point){
-            return response()->json(['message' => 'Unable to find the point.'],404);
+            return response()->json(['success' => false, 'message' => 'Unable to find a point.'],404);
         }
 
         if(!$point->delete()){
-            return response()->json(['message' => 'There was an error while deleting the point.']);
+            return response()->json(['success' => false, 'message' => 'There was an error while deleting the point.']);
         } 
-        return response()->json(['message' => 'Point was deleted succesfully.']);
+        return response()->json(['success' => true, 'message' => 'Point was deleted succesfully.']);
     }
 
     public function getNearestPoints($id, $limit){
