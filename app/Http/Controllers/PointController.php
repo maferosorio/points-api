@@ -24,7 +24,7 @@ class PointController extends Controller
             'coordinate_y' => 'required|numeric|regex:/^\d{1,4}(\.\d{1,2})?$/'
         ]);
 
-        if ($validator->fails()) {
+        if ( $validator->fails() ) {
             return response()->json(['success' => false, 'message' => 'Point could not be saved.','errors' => $validator->errors()]);
         }
         
@@ -43,12 +43,12 @@ class PointController extends Controller
      */
     public function show($id)
     {
-        $point = Point::find($id, ['name', 'coordinate_x','coordinate_y']);
-        
-        if(!$point){
+        $point = new Point();
+        $result = $point->read($id);
+        if( !$result ){
             return response()->json(['success' => false, 'message' => 'Unable to find a point.'],404);
         }
-        return response()->json(['success' => true, 'point' => array($point->toArray())]);
+        return response()->json(['success' => true, 'point' => array($result)]);
     }
 
 
@@ -61,11 +61,6 @@ class PointController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $point = new Point();    
-        $foundPoint= $point->verifyIfExists($id);    
-        if(!$foundPoint){
-            return response()->json(['message' => 'Unable to find a point.'],404);
-        }
         //regex: evaluates if a coordinate value is between 1 and 4 integer digits and 1 or 2 decimals digits.
         $validator = Validator::make($request->all(), [
             'name' => ['required','string','max:20', Rule::unique('points')->ignore($id)],
@@ -73,12 +68,13 @@ class PointController extends Controller
             'coordinate_y' => 'required|numeric|regex:/^\d{1,4}(\.\d{1,2})?$/'
         ]);
 
-        if($validator->fails()) {
+        if( $validator->fails() ) {
             return response()->json(['success' => false, 'message' => 'Point could not be updated.','errors' => $validator->errors()]);
         }
         
-        if( !$foundPoint->modify($request->all(), $foundPoint) ){
-            return response()->json(['success' => false, 'message' => 'There was an error while updating the point.']);
+        $point = new Point();
+        if( !$point->modify($request->all(), $id) ){
+            return response()->json(['success' => false, 'message' => 'Point could not be updated.']);
         }
         return response()->json(['success' => true, 'message' => 'Point was updated succesfully.']);
     }
@@ -91,13 +87,9 @@ class PointController extends Controller
      */
     public function destroy($id)
     {
-        $point = Point::find($id);
-        if(!$point){
-            return response()->json(['success' => false, 'message' => 'Unable to find a point.'],404);
-        }
-
-        if(!$point->delete()){
-            return response()->json(['success' => false, 'message' => 'There was an error while deleting the point.']);
+        $point = new Point();
+        if( !$point->remove($id) ){
+            return response()->json(['success' => false, 'message' => 'Point could not be deleted.']);
         } 
         return response()->json(['success' => true, 'message' => 'Point was deleted succesfully.']);
     }
