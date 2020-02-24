@@ -22,4 +22,4 @@ Route::post('/points', 'PointController@store');
 Route::delete('/points/{id}', 'PointController@destroy');
 Route::put('/points/{id}', 'PointController@update');
 Route::get('/points/{id}', 'PointController@show');
-Route::get('/points/{id}/{limit}', 'PointController@getNearestPoints')->name('nearest_points');
+Route::get('/nearest-points/{id}/{limit?}', 'PointController@getNearestPoints')->name('nearest_points');
