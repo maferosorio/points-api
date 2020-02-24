@@ -96,8 +96,67 @@ class PointController extends Controller
 
     public function getNearestPoints($id, $limit){
 
-        $points = Point::all();
+        //$points = Point::all();
+        $point = new Point();
+        $selectedPoint = $point->read($id);
+        if( !$selectedPoint ){
+            return response()->json(['success' => false, 'message' => 'Unable to find a point.'],404);
+        }
+        if($limit <= 0){
+            return response()->json(['success' => false, 'message' => 'Enter a valid limit value.']);
+        }
+        echo "<pre>"; //print_r($selectedPoint);
+        $pointsToCompare = $point->getPointsToCompare($id);
+        if( !$selectedPoint ){
+            return response()->json(['success' => false, 'message' => 'There are no more points.']);
+        }
 
-        dd($points);
+        $distances = $this->calculateDistances($selectedPoint, $pointsToCompare, $limit);
+        $nearestPoints = $this->getNeighborsData($distances, $pointsToCompare);
+        
+        if( count($nearestPoints) > 0 ){
+            return response()->json(['success' => true, 'data' => $nearestPoints]);
+        }
+        return response()->json(['success' => false, 'message' => 'There was an error trying to get the nearest points.']);
     }
+
+    public function calculateDistances($selectedPoint, $pointsToCompare, $limit){
+
+        $distances = array();
+        $exponent = 2;
+        //$source = array();
+        foreach ($pointsToCompare as $key => $point) {
+            //echo " selectedPoint: x: ".$selectedPoint['coordinate_x']." y: ".$selectedPoint['coordinate_y'];
+            //echo " point: x: ".$point['coordinate_x']." y: ".$point['coordinate_y'];
+            $distances[$point['id']] = sqrt( pow($selectedPoint['coordinate_x'] - $point['coordinate_x'], $exponent) + pow($selectedPoint['coordinate_y'] - $point['coordinate_y'], $exponent) );
+            //echo " distances:"; print_r($distances);
+        }
+        $distance = $distances;
+        echo "<pre>"; //print_r($distances);
+        asort($distances);
+        echo "asort: ";
+        print_r( $distances );
+        $pointsPerQuantity = array_slice($distances, 0, $limit, true);
+        echo "<pre>"; print_r(array_slice($distances, 0, $limit, true));
+        return $pointsPerQuantity;
+    }
+
+    public function getNeighborsData($distances, $points){
+        
+        $limitedPoints = array();
+        $index = 0;
+        echo "<pre>"; 
+        foreach ($distances as $key => $distance) {
+            foreach ($points as $point) {
+                if($key == $point['id']) {
+                    $limitedPoints[$index] = $point;
+                    $index++;
+                }
+            }
+        }
+        print_r( $limitedPoints );
+        return $limitedPoints;
+    }
+
+
 }

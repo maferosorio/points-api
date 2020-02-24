@@ -34,16 +34,23 @@ class Point extends Model
     public function remove($id){
 
     	$point = Point::find($id);
-    	if(!$point){ return false; }
+    	if( !$point || !$point->delete() ){ return false; }
         
-        if( !$point->delete() ){ return false; }
+        //if( !$point->delete() ){ return false; }
         return true;
     }
 
     public function read($id){
 
-    	$point = Point::find($id, ['name', 'coordinate_x','coordinate_y']);
+    	$point = Point::find($id, ['id','name', 'coordinate_x','coordinate_y']);
     	if(!$point){ return false; }
     	return $point->toArray();
+    }
+
+    public function getPointsToCompare($id){
+ 		
+    	$points = Point::select(['id','name', 'coordinate_x','coordinate_y'])->where('id', '!=' , $id)->get();
+    	if(!$points){ return false; }
+    	return $points->toArray();
     }
 }
