@@ -8,49 +8,44 @@ class Point extends Model
 {
     protected $fillable = ['name','coordinate_x','coordinate_y'];
 
-    public function create($data){
-
-    	$point = Point::firstOrCreate($data);
-    	if(!$point){ return false; } 
-    	return true;
-    	/*$point = new Point;
-        $point->name = $request->name;
-        $point->coordinate_x = $request->coordinate_x;
-        $point->coordinate_y = $request->coordinate_y;*/
+    function isDouble($limit) {
+        return is_float($limit) || ( is_numeric($limit) && ( (float) $limit != (int) $limit ) );
     }
 
-    public function modify($data, $id){
-
-    	$point = Point::find($id);
-        if(!$point){ return false; }
-
-    	$point->name = $data['name'];
-        $point->coordinate_x = $data['coordinate_x'];
-        $point->coordinate_y = $data['coordinate_y'];
-        if( !$point->save() ){ return false; }
-        return true;
+    function formatCoordinates($point){
+        $decimalPrecision = 2;
+        $point['coordinate_x'] = round($point['coordinate_x'], $decimalPrecision);
+        $point['coordinate_y'] = round($point['coordinate_y'], $decimalPrecision);
+        return $point;
     }
 
-    public function remove($id){
-
-    	$point = Point::find($id);
-    	if( !$point || !$point->delete() ){ return false; }
-        
-        //if( !$point->delete() ){ return false; }
-        return true;
+    public function calculateDistances($selectedPoint, $pointsToCompare, $limit)
+    {
+        $distances = array(); $exponent = 2; $offset = 0;
+        //Based on Pythagoras' theorem
+        foreach ($pointsToCompare as $key => $point) {
+            $distances[$point['id']] = sqrt( pow($selectedPoint['coordinate_x'] - $point['coordinate_x'], $exponent) + pow($selectedPoint['coordinate_y'] - $point['coordinate_y'], $exponent) );
+        }
+        asort($distances);
+        //array_slice: get array elements based in the Limit value
+        return ($limit != null) ? array_slice($distances, $offset, $limit, true) : $distances;
     }
 
-    public function read($id){
+    public function getNeighborsData($distances, $points)
+    {
+        $limitedPoints = array(); $index = 0; $decimalPrecision = 2;
 
-    	$point = Point::find($id, ['id','name', 'coordinate_x','coordinate_y']);
-    	if(!$point){ return false; }
-    	return $point->toArray();
-    }
-
-    public function getPointsToCompare($id){
- 		
-    	$points = Point::select(['id','name', 'coordinate_x','coordinate_y'])->where('id', '!=' , $id)->get();
-    	if(!$points){ return false; }
-    	return $points->toArray();
+        foreach ($distances as $key => $distance) {
+            foreach ($points as $point) {
+                if( $key == $point['id'] ) {
+                    $limitedPoints[$index] = $point;
+                    $limitedPoints[$index]['coordinate_x'] = round($point['coordinate_x'], $decimalPrecision);
+                    $limitedPoints[$index]['coordinate_y'] = round($point['coordinate_y'], $decimalPrecision);
+                    $limitedPoints[$index]['distance'] = round($distance, $decimalPrecision);
+                    $index++;
+                }
+            }
+        }
+        return $limitedPoints;
     }
 }

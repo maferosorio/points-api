@@ -28,8 +28,7 @@ class PointController extends Controller
             return response()->json(['success' => false, 'message' => 'Point could not be saved.','errors' => $validator->errors()]);
         }
         
-        $point = new Point();
-        if( !$point->create( $request->all() ) ){
+        if( !Point::create( $request->all() ) ){
             return response()->json(['success' => false, 'message' => 'There was an error while saving the point.']);
         }
         return response()->json(['success' => true, 'message' => 'Point was saved succesfully.']);
@@ -44,11 +43,11 @@ class PointController extends Controller
     public function show($id)
     {
         $point = new Point();
-        $result = $point->read($id);
+        $result = $point->find($id, ['id','name', 'coordinate_x','coordinate_y'])->toArray();
         if( !$result ){
             return response()->json(['success' => false, 'message' => 'Unable to find a point.'],404);
         }
-        return response()->json(['success' => true, 'point' => array( $this->formatCoordinates($result) )]);
+        return response()->json(['success' => true, 'point' => array( $point->formatCoordinates($result) )]);
     }
 
 
@@ -71,8 +70,9 @@ class PointController extends Controller
         if( $validator->fails() ) {
             return response()->json(['success' => false, 'message' => 'Point could not be updated.','errors' => $validator->errors()]);
         }
-        $point = new Point();
-        if( !$point->modify($request->all(), $id) ){
+        
+        $point = Point::findOrFail($id);
+        if( $point->update($request->all()) ){
             return response()->json(['success' => false, 'message' => 'Point could not be updated.']);
         }
         return response()->json(['success' => true, 'message' => 'Point was updated succesfully.']);
@@ -86,8 +86,8 @@ class PointController extends Controller
      */
     public function destroy($id)
     {
-        $point = new Point();
-        if( !$point->remove($id) ){
+        $point = Point::findOrFail($id);
+        if( !$point->delete() ){
             return response()->json(['success' => false, 'message' => 'Point could not be deleted.']);
         } 
         return response()->json(['success' => true, 'message' => 'Point was deleted succesfully.']);
@@ -96,67 +96,26 @@ class PointController extends Controller
     public function getNearestPoints($id, $limit = null)
     {
         $point = new Point();
-        $selectedPoint = $point->read($id);
+        $selectedPoint = $point->findOrFail($id, ['id','name', 'coordinate_x','coordinate_y'])->toArray();
         if( !$selectedPoint ){
             return response()->json(['success' => false, 'message' => 'Unable to find a point.'],404);
         } 
-        if( ($limit != null && $limit <= 0) || $this->isDouble($limit) ){
+        if( ($limit != null && $limit <= 0) || $point->isDouble($limit) ){
             return response()->json(['success' => false, 'message' => 'Enter a valid limit value.'],404);
         }
 
-        $pointsToCompare = $point->getPointsToCompare($id);
+        $pointsToCompare = $point->select(['id','name', 'coordinate_x','coordinate_y'])->where('id', '!=' , $id)->get()->toArray();
         if( !$pointsToCompare ){
             return response()->json(['success' => false, 'message' => 'There are no nearest points.']);
         }
         
-        $selectedPoint = $this->formatCoordinates($selectedPoint);
-        $distances = $this->calculateDistances($selectedPoint, $pointsToCompare, $limit);
-        $nearestPoints = $this->getNeighborsData($distances, $pointsToCompare);
+        $selectedPoint = $point->formatCoordinates($selectedPoint);
+        $distances = $point->calculateDistances($selectedPoint, $pointsToCompare, $limit);
+        $nearestPoints = $point->getNeighborsData($distances, $pointsToCompare);
 
         if( count($nearestPoints) > 0 ){
             return response()->json(['success' => true, 'limit' => (int) $limit, 'point' => array($selectedPoint), 'nearest_points' => $nearestPoints]);
         }
         return response()->json(['success' => false, 'message' => 'There was an error trying to get the nearest points.']);
-    }
-
-    function isDouble($limit) {
-        return is_float($limit) || ( is_numeric($limit) && ( (float) $limit != (int) $limit ) );
-    }
-
-    function formatCoordinates($point){
-        $decimalPrecision = 2;
-        $point['coordinate_x'] = round($point['coordinate_x'], $decimalPrecision);
-        $point['coordinate_y'] = round($point['coordinate_y'], $decimalPrecision);
-        return $point;
-    }
-
-    public function calculateDistances($selectedPoint, $pointsToCompare, $limit)
-    {
-        $distances = array(); $exponent = 2; $offset = 0;
-        //Based in the Pythagoras theorem
-        foreach ($pointsToCompare as $key => $point) {
-            $distances[$point['id']] = sqrt( pow($selectedPoint['coordinate_x'] - $point['coordinate_x'], $exponent) + pow($selectedPoint['coordinate_y'] - $point['coordinate_y'], $exponent) );
-        }
-        asort($distances);
-        //array_slice: get array elements based in the Limit value
-        return ($limit != null) ? array_slice($distances, $offset, $limit, true) : $distances;
-    }
-
-    public function getNeighborsData($distances, $points)
-    {
-        $limitedPoints = array(); $index = 0; $decimalPrecision = 2;
-
-        foreach ($distances as $key => $distance) {
-            foreach ($points as $point) {
-                if( $key == $point['id'] ) {
-                    $limitedPoints[$index] = $point;
-                    $limitedPoints[$index]['coordinate_x'] = round($point['coordinate_x'], $decimalPrecision);
-                    $limitedPoints[$index]['coordinate_y'] = round($point['coordinate_y'], $decimalPrecision);
-                    $limitedPoints[$index]['distance'] = round($distance, $decimalPrecision);
-                    $index++;
-                }
-            }
-        }
-        return $limitedPoints;
     }
 }
