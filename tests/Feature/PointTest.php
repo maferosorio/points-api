@@ -77,34 +77,34 @@ class PointTest extends TestCase
             ]);
     }
 
-    public function testCoordinateYIsEmptyWhenAddingAPoint()
+    public function testCannotAddAPoint()
     {
         $point = [
-            'name' => $this->faker->unique()->numerify('Point ###'),
-            'coordinate_x' => $this->faker->numberBetween(-100, 100)
+            'name' => $this->faker->unique()->sentence,
+            'coordinate_x' => 'test'
         ];
         
         $this->post(route('points.store'), $point)
-            ->assertStatus(200)
+            ->assertStatus(422)
             ->assertJson([
                 'success' => false,
-                'message' => 'Point could not be saved.',
+                'message' => 'Point can not be saved.',
             ]);
     }
 
-    public function testCoordinateYIsEmptyWhenUpdatingAPoint()
+    public function testCannotUpdateAPoint()
     {
         $point = factory(Point::class)->create();
         $data = [
-            'name' => $this->faker->unique()->numerify('Point ###'),
-            'coordinate_x' => $this->faker->numberBetween(-100, 100)
+            'name' => $this->faker->unique()->sentence,
+            'coordinate_x' => 'test'
         ];
         
         $this->put(route('points.update',$point->id), $data)
-            ->assertStatus(200)
+            ->assertStatus(422)
             ->assertJson([
                 'success' => false,
-                'message' => 'Point could not be updated.',
+                'message' => 'Point can not be saved.',
             ]);
     }
 
@@ -162,16 +162,4 @@ class PointTest extends TestCase
                 'message' => 'There are no nearest points.'
             ]);
     }
-
-
-    /*public function testBasicExample()
-    {
-        $response = $this->postJson('/user', ['name' => 'Sally']);
-
-        $response
-            ->assertStatus(201)
-            ->assertJson([
-                'created' => true,
-            ]);
-    }*/
 }
