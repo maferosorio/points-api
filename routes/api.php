@@ -18,8 +18,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
-Route::post('/points', 'PointController@store');
-Route::delete('/points/{id}', 'PointController@destroy');
-Route::put('/points/{id}', 'PointController@update');
-Route::get('/points/{id}', 'PointController@show');
-Route::get('/nearest-points/{id}/{limit?}', 'PointController@getNearestPoints')->name('nearest_points');
+Route::post('/points', 'PointController@store')->name('points.store');
+Route::delete('/points/{id}', 'PointController@destroy')->name('points.destroy');
+Route::put('/points/{id}', 'PointController@update')->name('points.update');
+Route::get('/points/{id}', 'PointController@show')->name('points.show');
+Route::get('/nearest-points/{id}/{limit?}', 'PointController@getNearestPoints')->name('points.nearest_points');

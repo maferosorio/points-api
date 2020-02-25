@@ -43,7 +43,7 @@ class PointController extends Controller
     public function show($id)
     {
         $point = new Point();
-        $result = $point->find($id, ['id','name', 'coordinate_x','coordinate_y'])->toArray();
+        $result = $point->findOrFail($id, ['id','name', 'coordinate_x','coordinate_y'])->toArray();
         if( !$result ){
             return response()->json(['success' => false, 'message' => 'Unable to find a point.'],404);
         }
@@ -72,7 +72,7 @@ class PointController extends Controller
         }
         
         $point = Point::findOrFail($id);
-        if( $point->update($request->all()) ){
+        if( !$point->update($request->all()) ){
             return response()->json(['success' => false, 'message' => 'Point could not be updated.']);
         }
         return response()->json(['success' => true, 'message' => 'Point was updated succesfully.']);
@@ -94,14 +94,12 @@ class PointController extends Controller
     }
 
     public function getNearestPoints($id, $limit = null)
-    {
+    {   
         $point = new Point();
         $selectedPoint = $point->findOrFail($id, ['id','name', 'coordinate_x','coordinate_y'])->toArray();
-        if( !$selectedPoint ){
-            return response()->json(['success' => false, 'message' => 'Unable to find a point.'],404);
-        } 
+    
         if( ($limit != null && $limit <= 0) || $point->isDouble($limit) ){
-            return response()->json(['success' => false, 'message' => 'Enter a valid limit value.'],404);
+            return response()->json(['success' => false, 'message' => 'Enter a valid limit value.']);
         }
 
         $pointsToCompare = $point->select(['id','name', 'coordinate_x','coordinate_y'])->where('id', '!=' , $id)->get()->toArray();
