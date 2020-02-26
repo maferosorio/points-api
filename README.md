@@ -4,12 +4,12 @@ _Api/REST para consultar localización de puntos (sensores)_
 
 ### Pre-requisitos 📋
 
-_Laravel 6_
-_PHP 7.4_
-_BD Mysql - Gestor Mysql Workbench (opcional)_
-_XAMPP (última versión preferiblemente)_
-_Postman (testear endpoints)_
-_Extensiones Tokenizer y xDebug (verificar la cobertura de código)_
+_- Laravel 6_
+_- PHP 7.4_
+_- BD Mysql - Gestor Mysql Workbench (opcional)_
+_- XAMPP (última versión preferiblemente)_
+_- Postman (testear endpoints)_
+_- Extensiones Tokenizer y xDebug (verificar la cobertura de código)_
 
 ### Instalación 🔧
 
@@ -37,8 +37,8 @@ _1) En la raíz del proyecto, ejecutar el comando:_
 ```
 php artisan serve
 ```
-_2) Abrir la aplicación Postman, crear las siguientes solicitudes:_
-
+_2)Iniciar el servidor de BD Mysql_
+_3) Abrir la aplicación Postman, crear las siguientes solicitudes:_
  
 - Tipo: POST, Headers: Content-Type => application/x-www-form-urlencoded, Url: http://localhost:8000/api/points (Crear punto)
 ```
@@ -58,3 +58,15 @@ coordinate_y:3
 - Tipo: GET, Headers: Content-Type => application/json, Url: http://localhost:8000/api/points/{id} (Obtener un punto)
 - Tipo: GET, Headers: Content-Type => application/json, Url: http://localhost:8000/api/nearest-points/{id}/{cantidad} (Obtener los puntos más cercanos dado un punto y cantidad)
 
+_Después de completar los datos para cada solicitud, hacer click en el botón "Send". Verificar las respuestas en la pestaña Body de la sección Respuesta._
+
+### Ejecutando Unit Tests 🔧
+
+_1) En la raíz del proyecto, ejecutar el comando:_
+```
+vendor\bin\phpunit
+```
+_2) Para verificar la cobertura en la consola, ejecutar:_
+```
+vendor\bin\phpunit --coverage-text
+```
