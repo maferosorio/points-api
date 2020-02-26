@@ -154,7 +154,7 @@ class PointTest extends TestCase
     {
         $point = factory(Point::class)->create();
         $numberOfPoints = 2;
-        //->dump();
+        
         $this->get(route('points.nearest_points', ['id' => $point->id, 'limit' => $numberOfPoints]))
             ->assertStatus(200)
             ->assertJson([
