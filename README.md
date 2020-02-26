@@ -14,6 +14,7 @@ _Api/REST para consultar localización de puntos (sensores)_
 ### Instalación 🔧
 
 _1)	Usando la consola, clonar proyecto dentro del directorio xampp/htdocs/. Si se usa otro servidor distinto a XAMPP, clonar en la carpeta contenedora de proyectos respectivamente._
+
 _2)	En la consola, ir a la raíz del proyecto (points-api) y ejecutar el comando:_
 ```
 composer install
@@ -31,10 +32,10 @@ _5)	Ejecutar seeder:_
 php artisan db:seed --class=PointSeeder
 ```
 _6) Paso Opcional: Instalar xDebug y Tokenizer_
-xDebug: Es una extensión de PHP para hacer debug.
+* xDebug: Es una extensión de PHP para hacer debug.
 - https://xdebug.org/docs/install
 - https://gist.github.com/odan/1abe76d373a9cbb15bed
-Tokenizer: 
+* Tokenizer: 
 - Windows: Incorporado al instalar XAMPP o WAMPP.
 - Ubuntu:
 ```
