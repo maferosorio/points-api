@@ -32,8 +32,8 @@ php artisan db:seed --class=PointSeeder
 ```
 _6) Paso Opcional: Instalar xDebug y Tokenizer_
 xDebug: Es una extensión de PHP para hacer debug.
--https://xdebug.org/docs/install
--https://gist.github.com/odan/1abe76d373a9cbb15bed
+- https://xdebug.org/docs/install
+- https://gist.github.com/odan/1abe76d373a9cbb15bed
 Tokenizer: 
 - Windows: Incorporado al instalar XAMPP o WAMPP.
 - Ubuntu:
