@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 $factory->define(Point::class, function (Faker $faker) {
     return [
         'name' => $faker->unique()->numerify('Point ###'),
-        'coordinate_x' => $faker->numberBetween(-100, 100),
-        'coordinate_y' => $faker->numberBetween(-100, 100)
+        'coordinate_x' => $faker->numberBetween(-99, 99),
+        'coordinate_y' => $faker->numberBetween(-99, 99)
     ];
 });

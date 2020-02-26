@@ -14,8 +14,8 @@ class PointTest extends TestCase
     {
         $point = [
             'name' => $this->faker->unique()->numerify('Point ###'),
-            'coordinate_x' => $this->faker->numberBetween(-100, 100),
-            'coordinate_y' => $this->faker->numberBetween(-100, 100)
+            'coordinate_x' => $this->faker->numberBetween(-99, 99),
+            'coordinate_y' => $this->faker->numberBetween(-99, 99)
         ];
         
         $this->post(route('points.store'), $point)
@@ -31,8 +31,8 @@ class PointTest extends TestCase
         
         $data = [
             'name' => $this->faker->unique()->numerify('Point ###'),
-            'coordinate_x' => $this->faker->numberBetween(-100, 100),
-            'coordinate_y' => $this->faker->numberBetween(-100, 100)
+            'coordinate_x' => $this->faker->numberBetween(-99, 99),
+            'coordinate_y' => $this->faker->numberBetween(-99, 99)
         ];
         
         $this->put(route('points.update', $point->id), $data)
@@ -141,7 +141,7 @@ class PointTest extends TestCase
         $points = factory(Point::class, 5)->create();
         $pointId = 1;
         $numberOfPoints = -1;
-        //->dump();
+        
         $this->get(route('points.nearest_points', ['id' => $pointId, 'limit' => $numberOfPoints]))
             ->assertStatus(200)
             ->assertJson([
