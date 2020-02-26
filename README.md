@@ -32,10 +32,12 @@ _5)	Ejecutar seeder:_
 php artisan db:seed --class=PointSeeder
 ```
 _6) Paso Opcional: Instalar xDebug y Tokenizer_
-* xDebug: Es una extensión de PHP para hacer debug.
+
+xDebug: Es una extensión de PHP para hacer debug.
 - https://xdebug.org/docs/install
 - https://gist.github.com/odan/1abe76d373a9cbb15bed
-* Tokenizer: 
+
+Tokenizer: 
 - Windows: Incorporado al instalar XAMPP o WAMPP.
 - Ubuntu:
 ```
@@ -48,7 +50,7 @@ _1) En la raíz del proyecto, ejecutar el comando:_
 ```
 php artisan serve
 ```
-_2)Iniciar el servidor de BD Mysql_
+_2) Iniciar el servidor de BD Mysql_
 _3) Abrir la aplicación Postman, crear las siguientes solicitudes:_
  
 - Tipo: POST, Url: http://localhost:8000/api/points (Crear punto), Headers: Content-Type => application/x-www-form-urlencoded
